@@ -6,7 +6,7 @@ import { readFile, writeFile} from "fs/promises";
 const FILE= "cart.json";
 
 const getCart = async () => {
-    const data = await readFile(FILE,"utf-8"); 
+    const data = await readFile(FILE,"utf-8"); // we use utf-8 so we can go above ASCII code
     return JSON.parse(data);
 };
 
@@ -31,9 +31,41 @@ const displayCart = async () => {
         return;
     }
     console.table(cart);   // to print the arrau with index we use console.table()
-    const total = cart.reduce((sum, item) => sum + item.price + item.qty, 0);
+    const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
     console.log(`Total Payable Amount Rs. ${total}`);
 };
+
+const removeProduct = async (pid)=>{
+    const cart = await getCart();
+    // const isFoundInCart = cart.find((item) => item.id === pid);
+    let x=cart.length;
+    const newproducts = cart.filter((item)=>item.id !== pid);
+    let y=newproducts.length;
+    if(y<x)
+    {
+        console.log(`Product with id ${pid} is removed from cart`);
+        await saveCart(newproducts);
+    } else {
+        console.log(`Product with id ${pid} not found`);
+    }
+};
+
+const updateQuantity = async (prid, option="-") => {
+    const cart = await getCart();
+    const isFoundInCart = cart.find((item) => item.id === prid);
+    if(isFoundInCart){
+        if(isFoundInCart.qty==1) {
+            await removeProduct(prid);
+        } else {
+        isFoundInCart.qty-=1;
+        await saveCart(cart);
+        }
+        console.log(`${isFoundInCart.name} quantity updated from 🛒`);
+    } else {
+        console.log(`Product with id ${pid} not found`);
+    }
+};
+
 const main =  async () => {
     let choice;
     const cin = readLine.createInterface({input: stdin, output: stdout});
@@ -53,7 +85,8 @@ const main =  async () => {
             break;
         case 2:
             const item = await cin.question("Enter id,name,price,qty:");
-            const [id, name, price, qty] = item.split(',').map((p) => p.trim());
+            const [id, name, price, qty] = item.split(',').map((p) => p.trim()); //we use split function to break the string and trim function to remove spaces from the start and end of the string.
+            // we use map for iteration
             await addToCart({
                 id: Number(id),
                 name,
@@ -63,10 +96,12 @@ const main =  async () => {
             break;
 
         case 3:
-            console.log("remove product");
+            let pid = await cin.question("Enter product id:");
+            await removeProduct((Number(pid)));
             break;
         case 4:
-            console.log("Update Quantity");
+            let prid = await cin.question("Enter product id and option(+/-)");
+            await updateQuantity((Number(prid)));
             break;
         case 5:
             console.log("Checkout");
@@ -79,3 +114,4 @@ const main =  async () => {
 };
 
 main();
+

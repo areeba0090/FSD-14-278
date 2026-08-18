@@ -25,4 +25,3 @@ sayHello("Areeba Alam");
 sayHi("Mohini");
 console.log(sum(5, 10));
 console.log(findSum(5, 15));
-

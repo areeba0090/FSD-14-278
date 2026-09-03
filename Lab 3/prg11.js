@@ -1,18 +1,58 @@
 import http from "http";
-
+import { createReadStream } from "fs";
 const server = http.createServer((req,res)=>{
 
     if(req.url === '/' && req.method === 'GET')
-        res.end("home page")
+        res.end("home page");
     else if(req.url === '/product' && req.method === 'GET')
-        res.end("show product")
+    {
+        const products = [
+            {
+                id: 1,
+                name:"mobile",
+                price:2000,
+            },
+            {
+                id:2,
+                name:"duster",
+                price:10,
+            }
+        ];
+         res.end(JSON.stringify(products));
+    }
     else if(req.url === '/product' && req.method === 'POST')
-        res.end("add product")
-    else if(req.url === '/product' && req.method === 'PUT')
-        res.end("update product")
-    else if(req.url === '/product' && req.method === 'DELETE')
-        res.end('remove product')
-})
+    {
+        // retrieve data from client
+        let body;
+        req.on("data",(chunk)=>{
+            body +=chunk
+        });
 
-server.listen(3000,()=>console.log("prg11 is running")
-)
+        req.on("end",()=>{
+            const product= JSON.parse(body)
+        
+            //add data to database
+            res.writeHead(201, {
+                "content-type":'application/json',
+            });
+            // send back the status
+            res.end(
+                JSON.stringify({
+                    msg:"product added",
+                    product,
+                }),
+            );
+        });
+    }
+    else if(req.url === '/product' && req.method === 'PUT')
+        res.end("update product");
+    else if(req.url === '/product' && req.method === 'DELETE')
+        res.end('remove product');
+    else {
+        res.end("Page Not Found")
+    }
+});
+
+server.listen(3000,()=>{
+   console.log("prg11 is running")
+});
